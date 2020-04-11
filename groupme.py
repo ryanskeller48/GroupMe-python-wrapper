@@ -199,7 +199,7 @@ class GroupMe:
 
         filtered = []
 
-        if userid is None and user is not None:
+        if userid is None and user is not None: # TODO: test on direct messages and implement needed changes
             groupid = messages[0]['group_id']
             group_members = self.get_group_members(groupid=groupid)
             userid = self.get_user_id(group_members, name=user, nickname=user)
@@ -269,7 +269,7 @@ class GroupMe:
             if not name and not groupid:
                 return
             elif not groupid and name:
-                groupid = self.get_group_id(groupname)
+                groupid = self.get_group_id(name)
 
             response = self._api_request_post(f"groups/{groupid}/messages?token={self.api_token}", json.dumps(data))
 
