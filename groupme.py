@@ -9,6 +9,9 @@ import re
 class APIAuthException(Exception):
     pass
 
+class BadNameException(Exception):
+    pass
+
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger(__name__)
 
@@ -87,6 +90,7 @@ class GroupMe:
         for group in groups:
             if group['name'] == name:
                 return group['id']
+        raise BadNameException
 
     def get_chat_id(self, name):
 
@@ -94,6 +98,7 @@ class GroupMe:
         for chat in chats:
             if chat['other_user']['name'] == name:
                 return chat['other_user']['id']
+        raise BadNameException
 
     def get_group_members(self, name=None, groupid=None):
         """ get list of members for a group """
