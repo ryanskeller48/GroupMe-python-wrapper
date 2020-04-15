@@ -29,56 +29,46 @@ Options:
                         
   --get_group_id=GET_GROUP_ID
                         
-                        Get internal id for group chat e.g.
-                        --get_group_id='Football Chat'
+    Get internal id for group chat e.g. --get_group_id='Football Chat'
                         
   --get_chat_id=GET_CHAT_ID
   
-                        Get internal id for direct message e.g.
-                        --get_chat_id='Rob'
+    Get internal id for direct message e.g. --get_chat_id='Rob'
                         
   --get_group_members=GET_GROUP_MEMBERS
   
-                        List members of chosen group message e.g.
-                        --get_group_members='Football Chat'
+    List members of chosen group message e.g. --get_group_members='Football Chat'
                         
   --get_chat_messages=GET_CHAT_MESSAGES
   
-                        Get all messages from a direct messages e.g.
-                        --get_chat_messages='Rob'
+    Get all messages from a direct messages e.g. --get_chat_messages='Rob'
                         
   --get_group_messages=GET_GROUP_MESSAGES
   
-                        Get all messages from a group message e.g.
-                        --get_group_messages='Football Chat'
+    Get all messages from a group message e.g. --get_group_messages='Football Chat'
                         
   --filter_text=FILTER_TEXT
   
-                        Filter messages by regex text e.g.
-                        --filter_text='^Hello!$'
+    Filter messages by regex text e.g. --filter_text='^Hello!$'
                         
   --filter_user=FILTER_USER
   
-                        Filter messages by user who sent e.g.
-                        --filter_user='Rob'
+    Filter messages by user who sent e.g. --filter_user='Rob'
                         
   --filter_dateOn=FILTER_DATEON
   
-                        Filter messages by exact date e.g.
-                        --filter_dateOn='09/13/2019' [date must be in format
-                        DD/MM/YYYY with leading zeroes]
+    Filter messages by exact date e.g. --filter_dateOn='09/13/2019' 
+    [date must be in format DD/MM/YYYY with leading zeroes]
                         
   --filter_dateAfter=FILTER_DATEAFTER
   
-                        Filter messages on or after exact date e.g.
-                        --filter_dateAfter='09/13/2019' [date must be in
-                        format DD/MM/YYYY with leading zeroes]
+    Filter messages on or after exact date e.g. --filter_dateAfter='09/13/2019' 
+    [date must be in format DD/MM/YYYY with leading zeroes]
                         
   --filter_dateBefore=FILTER_DATEBEFORE
   
-                        Filter messages on or before exact date e.g.
-                        --filter_dateBefore='09/13/2019' [date must be in
-                        format DD/MM/YYYY with leading zeroes]
+    Filter messages on or before exact date e.g. --filter_dateBefore='09/13/2019' 
+    [date must be in format DD/MM/YYYY with leading zeroes]
                         
   --count=COUNT         
   
@@ -86,7 +76,14 @@ Options:
   
   --send_message=SEND_MESSAGE
   
-                        Send message with provided text to chosen group/chat.
-                        Use --group_name='<GROUP NAME>' flag to send to a
-                        selected group.  Use --chat_name='<CHAT USER NAME>'
-                        flag to send to selected direct message. e.g. python3
+    Send message with provided text to chosen group/chat. Use --group_name='<GROUP NAME>' flag to send to a selected group. 
+    Use --chat_name='<CHAT USER NAME>' flag to send to selected direct message. 
+    e.g. python3 demo.py --send_message='Hello!' --group_name='Football Chat'
+    
+  --group_name=GROUP_NAME
+  
+    Specify group to send message to e.g. --group_name='Football Chat' 
+    
+  --chat_name=CHAT_NAME
+  
+    Specify user to send direct message to e.g. --chat_name='Rob'
