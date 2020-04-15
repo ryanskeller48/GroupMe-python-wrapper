@@ -77,8 +77,6 @@ def main():
         dms = g.get_chats()
         print ("\nUser direct messages:")
         for dm in dms:
-            if dm['other_user']['name'] == "Rob Henry":
-                print (dm)
             print ("    " + dm['other_user']['name'])
 
     elif options.get_groups:
