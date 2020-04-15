@@ -11,7 +11,7 @@ prerequisites: python 3
 
 3) run actions from command line e.g. `$ python3 demo.py --get_dms=True` have fun!
 
-`--help`
+---------------------
 
 Options:
 
