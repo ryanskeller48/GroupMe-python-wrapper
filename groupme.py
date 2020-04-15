@@ -12,6 +12,9 @@ class APIAuthException(Exception):
 class BadNameException(Exception):
     pass
 
+class BadMessageException(Exception):
+    pass
+
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger(__name__)
 
@@ -57,10 +60,12 @@ class GroupMe:
             return json.loads(raw)
         elif code >= 500:
             raise APIAuthException
+        elif code == 400:
+            raise BadMessageException
         else:
             logging.error(f"ERROR: Bad API POST call: {self.api_url}/{endpoint} | {code}")
 
-    def _epoch_to_datetime(self, epoch):
+    def epoch_to_datetime(self, epoch):
         """ make datetime object out of seconds from epoch time """
 
         return datetime.fromtimestamp(int(epoch))
@@ -204,19 +209,29 @@ class GroupMe:
 
         filtered = []
 
-        if userid is None and user is not None: # TODO: test on direct messages and implement needed changes
-            groupid = messages[0]['group_id']
-            group_members = self.get_group_members(groupid=groupid)
-            userid = self.get_user_id(group_members, name=user, nickname=user)
+        if userid is None and user is not None:
+            try:
+                groupid = messages[0]['group_id']
+                group_members = self.get_group_members(groupid=groupid)
+                userid = self.get_user_id(group_members, name=user, nickname=user)
+            except: # Direct Messages
+                userid = None
 
         for message in messages:
             passes = True
             raw_time = message['created_at']
-            timestamp = self._epoch_to_datetime(raw_time).date()
+            timestamp = self.epoch_to_datetime(raw_time).date()
 
-            if user:
+            if userid:
                 if 'sender_id' in message:
                     if message['sender_id'] != userid:
+                        passes = False
+                else:
+                    passes = False
+
+            elif user: # Direct Messages
+                if 'name' in message:
+                    if message['name'] != user:
                         passes = False
                 else:
                     passes = False
@@ -276,9 +291,11 @@ class GroupMe:
             elif not groupid and name:
                 groupid = self.get_group_id(name)
 
-            response = self._api_request_post(f"groups/{groupid}/messages?token={self.api_token}", json.dumps(data))
-
-            return response
+            try:
+                response = self._api_request_post(f"groups/{groupid}/messages?token={self.api_token}", json.dumps(data))
+                return response
+            except BadMessageException:
+                logging.error("GroupMe won't accept that message -- it may be too long or contain forbidden characters")
 
         elif chat:
 
@@ -295,6 +312,8 @@ class GroupMe:
                 }
             }
 
-            response = self._api_request_post(f"direct_messages?token={self.api_token}", json.dumps(data))
-
-            return response
+            try:
+                response = self._api_request_post(f"direct_messages?token={self.api_token}", json.dumps(data))
+                return response
+            except BadMessageException:
+                logging.error("GroupMe won't accept that message -- it may be too long or contain forbidden characters")
