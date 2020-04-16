@@ -122,7 +122,7 @@ class GroupMe:
                 if member['name'] == name or member['nickname'] == nickname:
                     return member['user_id']
 
-    def get_1page_messages(self, name=None, groupid=None, chatid=None, before=0, group=False, chat=False):
+    def get_1page_messages(self, name=None, groupid=None, chatid=None, before=0, group=False, chat=False, filt=None):
         """ by default, messages return 20 at a time, so need to paginate to get all """
 
         if not name and not groupid and not chatid: return
@@ -148,10 +148,17 @@ class GroupMe:
             return None
 
         if response is not None and response != []:
+                
             if chat:
-                return response['response']['direct_messages']
+                if filt:
+                    return filt(response['response']['direct_messages'])
+                else:
+                    return response['response']['direct_messages']
             else:
-                return response['response']['messages']
+                if filt:
+                    return filt(response['response']['direct_messages'])
+                else:
+                    return response['response']['messages']
 
     def get_all_messages(self, name=None, groupid=None, chatid=None, group=False, chat=False, filt=None):
         """ helper to paginate messages -- paginates on id of last message """
