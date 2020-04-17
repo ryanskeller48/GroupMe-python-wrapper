@@ -22,13 +22,21 @@ class MessageIterator:
             page = self.groupme.get_1page_messages(chatid=self.chatid, before=self.last_mess_id, chat=True)
             if page is not None and len(page) > 0:
                 self.last_mess_id = page[-1]['id']
-                return page
+                if self.filt:
+                    page = self.filt(page)
+                    return page
+                else:
+                    return page
 
         elif self.groupid:
             page = self.groupme.get_1page_messages(groupid=self.groupid, before=self.last_mess_id, group=True)
             if page is not None and len(page) > 0:
                 self.last_mess_id = page[-1]['id']
-                return page
+                if self.filt:
+                    page = self.filt(page)
+                    return page
+                else:
+                    return page
 
     def has_next(self):
 

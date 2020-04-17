@@ -3,10 +3,10 @@ from groupme import GroupMe
 
 GM_INSTANCE = GroupMe()
 
-def group_rank_num_posts(name):
+def group_rank_num_posts(name, filt=None, filtstr=None):
     """ leaderboard of total messages sent per user in group chat """
 
-    it = MessageIterator(name=name, group=True)
+    it = MessageIterator(name=name, group=True, filt=filt)
     members = GM_INSTANCE.get_group_members(name=name)
     scoreboard = {}
 
@@ -29,8 +29,11 @@ def group_rank_num_posts(name):
 
     score_sort = sorted(score_format)
     score_sort.reverse()
-
-    out = "\nNumber of posts by user:\n"
+    
+    if filtstr:
+        out = f"\nNumber of posts by user {filtstr}:\n"
+    else:
+        out = "\nNumber of posts by user:\n"
     for player in score_sort:
          out += f"    {player[1]} - {player[0]}\n"
 
