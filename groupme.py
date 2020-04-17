@@ -5,6 +5,7 @@ import requests
 from datetime import datetime, date, timedelta
 from random import randint
 import re
+from math import ceil
 
 class APIAuthException(Exception):
     pass
@@ -281,6 +282,12 @@ class GroupMe:
     def send_message(self, text, name=None, groupid=None, chatid=None, group=False, chat=False):
         """ send message to specified group/chat """
 
+        if len(text) > 1000:
+            messages = self.split_message(text)
+            for m in messages:
+                self.send_message(m, name=name, groupid=groupid, chatid=chatid, group=group, chat=chat)
+            return
+
         if not group and not chat:
             return
 
@@ -324,3 +331,58 @@ class GroupMe:
                 return response
             except BadMessageException:
                 logging.error("GroupMe won't accept that message -- it may be too long or contain forbidden characters")
+
+    def split_message(self, m):
+        """ split message into chunks if too long for GroupMe (max message len=1000 characters)"""
+        
+        maxlen = 920 # lets set this low because we'll re-add newlines and spaces that are cut
+        out = []
+        if "\n" in m:
+            segments = m.split("\n")
+            goodstr = ""
+            for segment in segments:
+                if len(segment) > maxlen:
+                    segments2 = self.split_message(segment)
+                    if len(goodstr) != 0:
+                        out += [goodstr]
+                    else:
+                        for s in segments2:
+                            out += [s]
+                else:
+                    if len(segment) + len(goodstr) <= maxlen:
+                        goodstr += "\n" + segment
+                    else:
+                        out += [goodstr]
+                        goodstr = ""
+        else:
+            if " " in m:
+                segments = m.split(" ")
+                goodstr = ""
+                for segment in segments:
+                    if len(segment) > maxlen:
+                        segments2 = self.split_message(segment)
+                        if len(goodstr) != 0:
+                            out += [goodstr]
+                        else:
+                            for s in segments2:
+                                out += [s]
+                    else:
+                        if len(segment) + len(goodstr) <= maxlen:
+                            goodstr += " " + segment
+                        else:
+                            out += [goodstr]
+                            goodstr = ""
+            else:
+                mlen = len(m)
+                num_segs = ceil(mlen/1000.)
+                start = 0
+                end = 999
+                tick = 0
+                while tick < num_segs:
+                    seg = m[start:end]
+                    start += 999
+                    end += 999
+                    tick += 1
+                    out += [seg]
+        return out
+
