@@ -87,3 +87,23 @@ Options:
   --chat_name=CHAT_NAME
   
     Specify user to send direct message to e.g. --chat_name='Rob'
+    
+  --group_rank_num_posts=GROUP_RANK_NUM_POSTS
+  
+    Get leaderboard of total messages sent per user in group chat e.g. --group_rank_num_posts='Football Chat'
+    
+  --group_rank_num_likes=GROUP_RANK_NUM_LIKES
+  
+    Get leaderboard of total likes received per user in group chat e.g.  --group_rank_num_likes='Football Chat'
+    
+  --group_rank_num_liked=GROUP_RANK_NUM_LIKED
+  
+    Get leaderboard of total likes given per user in group chat e.g.  --group_rank_num_liked='Football Chat'
+    
+  --group_rank_len_posts=GROUP_RANK_LEN_POSTS
+  
+    Tally total number of characters each user has sent in group and avg characters/post e.g. --group_rank_len_posts='Football Chat'
+    
+  --group_most_liked_post=GROUP_MOST_LIKED_POST
+  
+    Return the message(s) with the most likes in a group chat and its like count e.g. --group_most_liked_post='Football Chat'
