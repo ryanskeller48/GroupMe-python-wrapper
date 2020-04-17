@@ -4,6 +4,7 @@ from datetime import datetime
 import re
 from optparse import OptionParser
 import argparse
+from group_stats import *
 
 class BadDateException(Exception):
         pass
@@ -68,6 +69,24 @@ def main():
                       help="Specify group to send message to e.g. --group_name='Football Chat'")
     parser.add_option("--chat_name", action="store", dest="chat_name", default=None, 
                       help="Specify user to send direct message to e.g. --chat_name='Rob'")
+    # group_stats stuff
+    parser.add_option("--group_rank_num_posts", action="store", dest="group_rank_num_posts", default=None,
+                      help="Get leaderboard of total messages sent per user in group chat e.g." + \
+                           " --group_rank_num_posts='Football Chat'")
+    parser.add_option("--group_rank_num_likes", action="store", dest="group_rank_num_likes", default=None,
+                      help="Get leaderboard of total likes received per user in group chat e.g. " + \
+                           " --group_rank_num_likes='Football Chat'")
+    parser.add_option("--group_rank_num_liked", action="store", dest="group_rank_num_liked", default=None,
+                      help="Get leaderboard of total likes given per user in group chat e.g. " + \
+                           " --group_rank_num_liked='Football Chat'")
+    parser.add_option("--group_rank_len_posts", action="store", dest="group_rank_len_posts", default=None,
+                      help="Tally total number of characters each user has sent in group and avg characters/post " + \
+                           "e.g. --group_rank_len_posts='Football Chat'")
+    parser.add_option("--group_most_liked_post", action="store", dest="group_most_liked_post", default=None,
+                      help="Return the message(s) with the most likes in a group chat and its like count " + \
+                           "e.g. --group_most_liked_post='Football Chat'")
+
+    # TODO: add orphaned_users option when finished with that method
 
     # grab input from command line
     (options, _) = parser.parse_args()
@@ -211,6 +230,22 @@ def main():
             print (sent)
         else:
             print ("Provide a --chat_name or --group_name! Try --help")
+
+    # group_stats stuff
+    elif options.group_rank_num_posts:
+        print (group_rank_num_posts(options.group_rank_num_posts))
+        
+    elif options.group_rank_num_likes:
+        print (group_rank_num_likes(options.group_rank_num_likes))
+
+    elif options.group_rank_num_liked:
+        print (group_rank_num_liked(options.group_rank_num_liked))
+
+    elif options.group_rank_len_posts:
+        print (group_rank_len_posts(options.group_rank_len_posts))
+
+    elif options.group_most_liked_post:
+        print (group_most_liked_post(options.group_most_liked_post))
 
     else: # no input
         print ("Provide an action! Try --help")
