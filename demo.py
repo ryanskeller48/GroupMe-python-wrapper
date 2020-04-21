@@ -85,6 +85,9 @@ def main():
     parser.add_option("--group_most_liked_post", action="store", dest="group_most_liked_post", default=None,
                       help="Return the message(s) with the most likes in a group chat and its like count " + \
                            "e.g. --group_most_liked_post='Football Chat'")
+    parser.add_option("--orphaned_users", action="store", dest="orphaned_users", default=None,
+                      help="Find users that have left a group and list their usernames/GroupMe ID #s " + \
+                           "e.g. --orphaned_users='Football Chat'")
 
     # TODO: add orphaned_users option when finished with that method
 
@@ -246,6 +249,9 @@ def main():
 
     elif options.group_most_liked_post:
         print (group_most_liked_post(options.group_most_liked_post))
+
+    elif options.orphaned_users:
+        print (orphaned_users(options.orphaned_users))
 
     else: # no input
         print ("Provide an action! Try --help")

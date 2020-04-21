@@ -211,10 +211,9 @@ def orphaned_users(groupname):
     page = it.next()
     while (page != None):
         for message in page:
-            if message['sender_id'] != "system" and message['sender_id'] not in current_ids and ( \
-                message['sender_id'] not in orphan_ids or \
-                    (message['sender_id'] in orphan_ids and orphan_ids[message['sender_id']] is None) \
-                ):
+            if message['sender_id'] != "system" and message['sender_id'] != "calendar" and \
+                message['sender_id'] not in current_ids and (message['sender_id'] not in orphan_ids or \
+                (message['sender_id'] in orphan_ids and orphan_ids[message['sender_id']] is None) ):
                     if 'name' in message and message['name'] is not None:
                         orphan_ids[message['sender_id']] = message['name']
                     else:
