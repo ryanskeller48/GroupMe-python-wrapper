@@ -206,17 +206,25 @@ def orphaned_users(groupname):
     it = MessageIterator(name=groupname, group=True)
     current_members = GM_INSTANCE.get_group_members(name=groupname)
     current_ids = [member['user_id'] for member in current_members]
-    orphan_ids = []
+    orphan_ids = {}
 
     page = it.next()
     while (page != None):
         for message in page:
-            if message['sender_id'] != "system" and message['sender_id'] not in current_ids \
-                and message['sender_id'] not in orphan_ids:
-                    orphan_ids += [message['sender_id']]
+            if message['sender_id'] != "system" and message['sender_id'] not in current_ids and ( \
+                message['sender_id'] not in orphan_ids or \
+                    (message['sender_id'] in orphan_ids and orphan_ids[message['sender_id']] is None) \
+                ):
+                    if 'name' in message and message['name'] is not None:
+                        orphan_ids[message['sender_id']] = message['name']
+                    else:
+                        orphan_ids[message['sender_id']] = None
         page = it.next()
 
-    # TODO: figure out how to get usernames or posts for ophan_ids
+    out = f"\nUsers that have left group '{groupname}':\n"
+    for orphan_id in orphan_ids:
+        out += f"    Name: {orphan_ids[orphan_id]} | GroupMe ID #: {orphan_id}\n"
+    out += "\n"
 
-    return orphan_ids
+    return out
 
