@@ -1,13 +1,22 @@
-import sys
-from groupme import GroupMe, BadNameException
-from datetime import datetime
-import re
-from optparse import OptionParser
 import argparse
+import re
+import sys
+
+from datetime import datetime
+from optparse import OptionParser
+
+from filter import MessageFilter
+from groupme import GroupMe, BadNameException
 from group_stats import *
 
-class BadDateException(Exception):
-        pass
+
+class BadDateStringException(Exception):
+
+    def __init__(self, message="Invalid date string entered.  " +
+                 "Valid format: DD/MM/YYYY (use leading zeroes for single digits)."):
+        self.message = message
+        super().__init__(self.message)
+
 
 DATEON_HELP = "Filter messages by exact date e.g. --filter_dateOn='09/13/2019' " + \
               "[date must be in format DD/MM/YYYY with leading zeroes]"
@@ -21,14 +30,15 @@ SEND_HELP = "Send message with provided text to chosen group/chat.  Use --group_
 
 def parse_input_date(d):
     try:
+        if d is None:
+            return None
         d = d.split('/')
-        month = int(d[0])
-        day = int(d[1])
+        day = int(d[0])
+        month = int(d[1])
         year = int(d[2])
         return datetime(year, month, day).date()
-    except:
-        print ("Bad date! Date must be in format DD/MM/YYYY with leading zeroes")
-        raise BadDateException
+    except:  # TODO catch error
+        raise BadDateStringException
 
 def main():
 
@@ -38,7 +48,7 @@ def main():
     usage = "usage: interact with GroupMe API -- list chats/DMs/messages, send messages, " + \
             "filter messages by text/sender/date"
 
-    # set up command line options
+    # Set up command line options
     parser = OptionParser(usage)
 
     parser.add_option("--get_dms", action="store", dest="get_dms", default=None,
@@ -88,13 +98,44 @@ def main():
     parser.add_option("--orphaned_users", action="store", dest="orphaned_users", default=None,
                       help="Find users that have left a group and list their usernames/GroupMe ID #s " + \
                            "e.g. --orphaned_users='Football Chat'")
+    # parser.add_option("--test", action="store", dest="test", default=None,
+    #                   help="")
 
     # TODO: add orphaned_users option when finished with that method
 
-    # grab input from command line
+    # Grab input from command line
     (options, _) = parser.parse_args()
 
-    # carry out specified action
+    # Let's look for any filter data and build that first
+    message_filter = MessageFilter(username=options.filter_user,
+                                   text=options.filter_text,
+                                   date_on=parse_input_date(options.filter_dateOn),
+                                   date_before=parse_input_date(options.filter_dateBefore),
+                                   date_after=parse_input_date(options.filter_dateAfter))
+    filter_lambda = message_filter.filter_lambda()
+    # filters = {
+    #     "text": None,
+    #     "user": None,
+    #     "dateOn": None,
+    #     "dateAfter": None,
+    #     "dateBefore": None,
+    # }
+    # if options.filter_text:
+    #     filters["text"] = rf"{options.filter_text}"
+    # if options.filter_dateOn:
+    #     filters["dateOn"] = parse_input_date(options.filter_dateOn)
+    # else:  # These filters can't be used in conjunction with filter_dateOn
+    #     if options.filter_dateBefore:
+    #         filters["dateBefore"] = parse_input_date(options.filter_dateBefore)
+    #     if options.filter_dateAfter:
+    #         filters["dateAfter"] = parse_input_date(options.filter_dateAfter)
+    # if options.filter_user:
+    #     filters["user"] = options.filter_user
+
+    # user_filter = g.filter_lambda(text=filters["text"], user=filters["user"], dateOn=filters["dateOn"],
+    #                                 dateAfter=filters["dateAfter"], dateBefore=filters["dateBefore"])
+
+    # Carry out specified action
     if options.get_dms:
         dms = g.get_chats()
         print ("\nUser direct messages:")
@@ -131,30 +172,30 @@ def main():
             print (f"\nNo group by that name! (name: \"{options.get_group_members}\")")
 
     elif options.get_chat_messages:
-        filters = {
-            "text": None,
-            "user": None,
-            "dateOn": None,
-            "dateAfter": None,
-            "dateBefore": None,
-        }
-        if options.filter_text:
-            filters["text"] = rf"{options.filter_text}"
-        if options.filter_dateOn:
-            filters["dateOn"] = parse_input_date(options.filter_dateOn)
-        else:
-            if options.filter_dateBefore:
-                filters["dateBefore"] = parse_input_date(options.filter_dateBefore)
-            if options.filter_dateAfter:
-                filters["dateAfter"] = parse_input_date(options.filter_dateAfter)
-        if options.filter_user:
-            filters["user"] = options.filter_user
+        # filters = {
+        #     "text": None,
+        #     "user": None,
+        #     "dateOn": None,
+        #     "dateAfter": None,
+        #     "dateBefore": None,
+        # }
+        # if options.filter_text:
+        #     filters["text"] = rf"{options.filter_text}"
+        # if options.filter_dateOn:
+        #     filters["dateOn"] = parse_input_date(options.filter_dateOn)
+        # else:
+        #     if options.filter_dateBefore:
+        #         filters["dateBefore"] = parse_input_date(options.filter_dateBefore)
+        #     if options.filter_dateAfter:
+        #         filters["dateAfter"] = parse_input_date(options.filter_dateAfter)
+        # if options.filter_user:
+        #     filters["user"] = options.filter_user
 
-        user_filter = g.filter_lambda(text=filters["text"], user=filters["user"], dateOn=filters["dateOn"],
-                                      dateAfter=filters["dateAfter"], dateBefore=filters["dateBefore"])
+        # user_filter = g.filter_lambda(text=filters["text"], user=filters["user"], dateOn=filters["dateOn"],
+        #                               dateAfter=filters["dateAfter"], dateBefore=filters["dateBefore"])
 
         try:
-            messages = g.get_all_messages(name=options.get_chat_messages, chat=True, filt=user_filter)
+            messages = g.get_all_messages(name=options.get_chat_messages, chat=True, filt=filter_lambda)
             if not messages:
                 print ("No messages match filter")
                 return
@@ -162,6 +203,7 @@ def main():
             if options.count:
                 print (f"\n# messages matching filter: {len(messages)}")
             else:
+                # TODO: probably a way to fold this and the below message-printer into one function
                 print ("")
                 if not messages:
                     print ("No messages match filter")
@@ -175,30 +217,30 @@ def main():
             print (f"\nNo direct message with that user! (name: \"{options.get_chat_messages}\")")
 
     elif options.get_group_messages:
-        filters = {
-            "text": None,
-            "user": None,
-            "dateOn": None,
-            "dateAfter": None,
-            "dateBefore": None,
-        }
-        if options.filter_text: 
-            filters["text"] = rf"{options.filter_text}"
-        if options.filter_dateOn:
-            filters["dateOn"] = parse_input_date(options.filter_dateOn)
-        else:
-            if options.filter_dateBefore:
-                filters["dateBefore"] = parse_input_date(options.filter_dateBefore)
-            if options.filter_dateAfter:
-                filters["dateAfter"] = parse_input_date(options.filter_dateAfter)
-        if options.filter_user:
-            filters["user"] = options.filter_user
+        # filters = {
+        #     "text": None,
+        #     "user": None,
+        #     "dateOn": None,
+        #     "dateAfter": None,
+        #     "dateBefore": None,
+        # }
+        # if options.filter_text: 
+        #     filters["text"] = rf"{options.filter_text}"
+        # if options.filter_dateOn:
+        #     filters["dateOn"] = parse_input_date(options.filter_dateOn)
+        # else:
+        #     if options.filter_dateBefore:
+        #         filters["dateBefore"] = parse_input_date(options.filter_dateBefore)
+        #     if options.filter_dateAfter:
+        #         filters["dateAfter"] = parse_input_date(options.filter_dateAfter)
+        # if options.filter_user:
+        #     filters["user"] = options.filter_user
 
-        user_filter = g.filter_lambda(text=filters["text"], user=filters["user"], dateOn=filters["dateOn"],
-                                      dateAfter=filters["dateAfter"], dateBefore=filters["dateBefore"])
+        # user_filter = g.filter_lambda(text=filters["text"], user=filters["user"], dateOn=filters["dateOn"],
+        #                               dateAfter=filters["dateAfter"], dateBefore=filters["dateBefore"])
 
         try:
-            messages = g.get_all_messages(name=options.get_group_messages, group=True, filt=user_filter)
+            messages = g.get_all_messages(name=options.get_group_messages, group=True, filt=filter_lambda)
             if not messages:
                 print ("No messages match filter")
                 return

@@ -7,7 +7,7 @@ Prerequisites: Python 3
 
 1) Register an "application" with GroupMe (https://dev.groupme.com/applications/new -- you can use dummy data) to receive a GroupMe API token.
 
-2) In Terminal, `$ export groupme_token=<Groupme API Token from step 1>`
+2) In Terminal, `$ export GROUPME_TOKEN=<Groupme API Token from step 1>`
 
 3) Run actions from command line e.g. `$ python3 demo.py --get_dms=True` have fun!
 
