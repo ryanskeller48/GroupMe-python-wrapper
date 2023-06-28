@@ -50,12 +50,8 @@ Prerequisites: Python 3
 
   User group messages:
      Settle Squad
-     Basketball Americans
      Online Catan
-     Does He Know?
      Video Games
-     RIP Baelish
-     Rounds
      Dave’s Bachelor
   ```
                         
