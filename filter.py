@@ -24,29 +24,12 @@ class MessageFilter:
         self.date_before = date_before if self.date_on is None else None
         self.date_after = date_after if self.date_on is None else None
 
+
     def filter_lambda(self) -> Callable:
         """ Make a Callable filter to apply to returned messages. """
         return lambda messages : self.filter_messages(messages)
 
-    # def filter_string(self, user=None, userid=None, text=None, dateOn=None, dateBefore=None, dateAfter=None):
-    #     """ Make the string """
-    #     outstr = "{Filter ="
-    #     if user:
-    #         outstr += f" user:{user}"
-    #     if userid:
-    #         outstr += f" userid:{userid}"
-    #     if text:
-    #         outstr += f" text:'{text}'"
-    #     if dateOn:
-    #         outstr += f" dateOn:{dateOn}"
-    #     if dateAfter:
-    #         outstr += f" dateAfter:{dateAfter}"
-    #     if dateBefore:
-    #         outstr += f" dateBefore:{dateBefore}"
-    #     outstr += "}"
-    #     return outstr
 
-    # def filter_messages(self, messages, user=None, userid=None, text=None, dateOn=None, dateBefore=None, dateAfter=None):
     def filter_messages(self, messages):
         # TODO: split each filter type into own function
         """ Filter messages by text, sender, date, etc. """

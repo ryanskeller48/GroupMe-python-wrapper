@@ -42,13 +42,12 @@ def parse_input_date(d):
 
 def main():
 
-    # create a GroupMe API wrapper instance
+    # Create a GroupMe API wrapper instance
     g = GroupMe()
-    
-    usage = "usage: interact with GroupMe API -- list chats/DMs/messages, send messages, " + \
-            "filter messages by text/sender/date"
 
     # Set up command line options
+    usage = "usage: interact with GroupMe API -- list chats/DMs/messages, send messages, " + \
+            "filter messages by text/sender/date"
     parser = OptionParser(usage)
 
     parser.add_option("--get_dms", action="store", dest="get_dms", default=None,
@@ -79,6 +78,7 @@ def main():
                       help="Specify group to send message to e.g. --group_name='Football Chat'")
     parser.add_option("--chat_name", action="store", dest="chat_name", default=None, 
                       help="Specify user to send direct message to e.g. --chat_name='Rob'")
+
     # group_stats stuff
     parser.add_option("--group_rank_num_posts", action="store", dest="group_rank_num_posts", default=None,
                       help="Get leaderboard of total messages sent per user in group chat e.g." + \
@@ -98,10 +98,6 @@ def main():
     parser.add_option("--orphaned_users", action="store", dest="orphaned_users", default=None,
                       help="Find users that have left a group and list their usernames/GroupMe ID #s " + \
                            "e.g. --orphaned_users='Football Chat'")
-    # parser.add_option("--test", action="store", dest="test", default=None,
-    #                   help="")
-
-    # TODO: add orphaned_users option when finished with that method
 
     # Grab input from command line
     (options, _) = parser.parse_args()
@@ -113,40 +109,21 @@ def main():
                                    date_before=parse_input_date(options.filter_dateBefore),
                                    date_after=parse_input_date(options.filter_dateAfter))
     filter_lambda = message_filter.filter_lambda()
-    # filters = {
-    #     "text": None,
-    #     "user": None,
-    #     "dateOn": None,
-    #     "dateAfter": None,
-    #     "dateBefore": None,
-    # }
-    # if options.filter_text:
-    #     filters["text"] = rf"{options.filter_text}"
-    # if options.filter_dateOn:
-    #     filters["dateOn"] = parse_input_date(options.filter_dateOn)
-    # else:  # These filters can't be used in conjunction with filter_dateOn
-    #     if options.filter_dateBefore:
-    #         filters["dateBefore"] = parse_input_date(options.filter_dateBefore)
-    #     if options.filter_dateAfter:
-    #         filters["dateAfter"] = parse_input_date(options.filter_dateAfter)
-    # if options.filter_user:
-    #     filters["user"] = options.filter_user
-
-    # user_filter = g.filter_lambda(text=filters["text"], user=filters["user"], dateOn=filters["dateOn"],
-    #                                 dateAfter=filters["dateAfter"], dateBefore=filters["dateBefore"])
 
     # Carry out specified action
     if options.get_dms:
         dms = g.get_chats()
         print ("\nUser direct messages:")
         for dm in dms:
-            print ("    " + dm['other_user']['name'])
+            print (f"    {dm['other_user']['name']}")
+
 
     elif options.get_groups:
         dms = g.get_groups()
         print ("\nUser group messages:")
         for dm in dms:
-            print ("    " + dm['name'])
+            print (f"    {dm['name']}")
+
 
     elif options.get_group_id:
         gid = g.get_group_id(options.get_group_id)
@@ -155,12 +132,14 @@ def main():
         else:
             print (f"\nNo group by that name! (name: \"{options.get_group_id}\")")
 
+
     elif options.get_chat_id:
         cid = g.get_chat_id(options.get_chat_id)
         if cid:
             print (f"\nGroup ID for chat with user \"{options.get_chat_id}\": {cid}")
         else:
             print (f"\nNo direct message with that user! (name: \"{options.get_chat_id}\")")
+
 
     elif options.get_group_members:
         members = g.get_group_members(name=options.get_group_members, groupid=options.get_group_members)
@@ -171,100 +150,55 @@ def main():
         else:
             print (f"\nNo group by that name! (name: \"{options.get_group_members}\")")
 
+
     elif options.get_chat_messages:
-        # filters = {
-        #     "text": None,
-        #     "user": None,
-        #     "dateOn": None,
-        #     "dateAfter": None,
-        #     "dateBefore": None,
-        # }
-        # if options.filter_text:
-        #     filters["text"] = rf"{options.filter_text}"
-        # if options.filter_dateOn:
-        #     filters["dateOn"] = parse_input_date(options.filter_dateOn)
-        # else:
-        #     if options.filter_dateBefore:
-        #         filters["dateBefore"] = parse_input_date(options.filter_dateBefore)
-        #     if options.filter_dateAfter:
-        #         filters["dateAfter"] = parse_input_date(options.filter_dateAfter)
-        # if options.filter_user:
-        #     filters["user"] = options.filter_user
 
-        # user_filter = g.filter_lambda(text=filters["text"], user=filters["user"], dateOn=filters["dateOn"],
-        #                               dateAfter=filters["dateAfter"], dateBefore=filters["dateBefore"])
+        messages = g.get_all_messages(name=options.get_chat_messages, chat=True, filt=filter_lambda)
+        if not messages:
+            print ("No messages match filter")
+            return
 
-        try:
-            messages = g.get_all_messages(name=options.get_chat_messages, chat=True, filt=filter_lambda)
+        if options.count:
+            print (f"\n# messages matching filter: {len(messages)}")
+        else:
+            # TODO: probably a way to fold this and the below message-printer into one function
+            print ("")
             if not messages:
                 print ("No messages match filter")
                 return
+            for message in messages:
+                message_meta = f"Sender: {message['name']} | " + \
+                                f"Date: {g.epoch_to_datetime(message['created_at']).date()}"
+                print (message_meta)
+                print (f"    Text: {message['text']}\n")
 
-            if options.count:
-                print (f"\n# messages matching filter: {len(messages)}")
-            else:
-                # TODO: probably a way to fold this and the below message-printer into one function
-                print ("")
-                if not messages:
-                    print ("No messages match filter")
-                    return
-                for message in messages:
-                    message_meta = f"Sender: {message['name']} | " + \
-                                   f"Date: {g.epoch_to_datetime(message['created_at']).date()}"
-                    print (message_meta)
-                    print (f"    Text: {message['text']}\n")
-        except BadNameException:
-            print (f"\nNo direct message with that user! (name: \"{options.get_chat_messages}\")")
 
     elif options.get_group_messages:
-        # filters = {
-        #     "text": None,
-        #     "user": None,
-        #     "dateOn": None,
-        #     "dateAfter": None,
-        #     "dateBefore": None,
-        # }
-        # if options.filter_text: 
-        #     filters["text"] = rf"{options.filter_text}"
-        # if options.filter_dateOn:
-        #     filters["dateOn"] = parse_input_date(options.filter_dateOn)
-        # else:
-        #     if options.filter_dateBefore:
-        #         filters["dateBefore"] = parse_input_date(options.filter_dateBefore)
-        #     if options.filter_dateAfter:
-        #         filters["dateAfter"] = parse_input_date(options.filter_dateAfter)
-        # if options.filter_user:
-        #     filters["user"] = options.filter_user
 
-        # user_filter = g.filter_lambda(text=filters["text"], user=filters["user"], dateOn=filters["dateOn"],
-        #                               dateAfter=filters["dateAfter"], dateBefore=filters["dateBefore"])
+        messages = g.get_all_messages(name=options.get_group_messages, group=True, filt=filter_lambda)
+        if not messages:
+            print ("No messages match filter")
+            return
 
-        try:
-            messages = g.get_all_messages(name=options.get_group_messages, group=True, filt=filter_lambda)
-            if not messages:
-                print ("No messages match filter")
-                return
+        groupid = messages[0]['group_id']
+        members = g.get_group_members(groupid=groupid)
 
-            groupid = messages[0]['group_id']
-            members = g.get_group_members(groupid=groupid)
+        if options.count:
+            print (f"\n# messages matching filter: {len(messages)}")
+        else:
+            print ("")
+            for message in messages:
+                for member in members:
+                    if member['user_id'] == message['sender_id']:
+                        sender = member
+                sender_name = sender['nickname']
+                sender_nickname = sender['name']
+                message_meta = f"Sender: {sender_nickname} ({sender_name}) | " + \
+                                f"Date: {g.epoch_to_datetime(message['created_at']).date()}"
 
-            if options.count:
-                print (f"\n# messages matching filter: {len(messages)}")
-            else:
-                print ("")
-                for message in messages:
-                    for member in members:
-                        if member['user_id'] == message['sender_id']:
-                            sender = member
-                    sender_name = sender['nickname']
-                    sender_nickname = sender['name']
-                    message_meta = f"Sender: {sender_nickname} ({sender_name}) | " + \
-                                   f"Date: {g.epoch_to_datetime(message['created_at']).date()}"
+                print (message_meta)
+                print (f"    Text: {message['text']}\n")
 
-                    print (message_meta)
-                    print (f"    Text: {message['text']}\n")
-        except BadNameException:
-            print (f"\nNo group message with that name! (name: \"{options.get_group_messages}\")")
 
     elif options.send_message: 
         if options.group_name:
